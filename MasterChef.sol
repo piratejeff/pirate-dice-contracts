@@ -778,13 +778,13 @@ contract ERC20 is Context, IERC20 {
 }
 
 
-// File contracts/Booty.sol
+// File contracts/Astroid.sol
 
 pragma solidity >=0.6.0;
 
 
-contract PirateBooty is ERC20("PirateBooty", "BOOTY"), Ownable {
-    
+contract Astroid is ERC20("Astroid", "ROID"), Ownable {
+
     function mint(address _to, uint256 _amount) public onlyOwner {
         _mint(_to, _amount);
     }
@@ -799,10 +799,10 @@ pragma solidity >=0.6.0;
 
 
 
-// MasterChef is the master of Booty. He can make Booty and he is a fair guy.
+// MasterChef is the master of Roid. He can make Roid and he is a fair guy.
 //
 // Note that it's ownable and the owner wields tremendous power. The ownership
-// will be transferred to a governance smart contract once BOOTY is sufficiently
+// will be transferred to a governance smart contract once ROID is sufficiently
 // distributed and the community can show to govern itself.
 //
 // Have fun reading it. Hopefully it's bug-free. God bless.
@@ -815,13 +815,13 @@ contract MasterChef is Ownable {
         uint256 amount;         // How many LP tokens the user has provided.
         uint256 rewardDebt;     // Reward debt. See explanation below.
         //
-        // We do some fancy math here. Basically, any point in time, the amount of BOOTYs
+        // We do some fancy math here. Basically, any point in time, the amount of ROIDs
         // entitled to a user but is pending to be distributed is:
         //
-        //   pending reward = (user.amount * pool.accBootyPerShare) - user.rewardDebt
+        //   pending reward = (user.amount * pool.accAstroidPerShare) - user.rewardDebt
         //
         // Whenever a user deposits or withdraws LP tokens to a pool. Here's what happens:
-        //   1. The pool's `accBootyPerShare` (and `lastRewardBlock`) gets updated.
+        //   1. The pool's `accRoidPerShare` (and `lastRewardBlock`) gets updated.
         //   2. User receives the pending reward sent to his/her address.
         //   3. User's `amount` gets updated.
         //   4. User's `rewardDebt` gets updated.
@@ -830,21 +830,21 @@ contract MasterChef is Ownable {
     // Info of each pool.
     struct PoolInfo {
         IERC20 lpToken;           // Address of LP token contract.
-        uint256 allocPoint;       // How many allocation points assigned to this pool. BOOTYs to distribute per block.
-        uint256 lastRewardBlock;  // Last block number that BOOTYs distribution occurs.
-        uint256 accBootyPerShare;   // Accumulated BOOTYs per share, times 1e12. See below.
+        uint256 allocPoint;       // How many allocation points assigned to this pool. ROIDs to distribute per block.
+        uint256 lastRewardBlock;  // Last block number that ROIDs distribution occurs.
+        uint256 accRoidPerShare;   // Accumulated Roids per share, times 1e12. See below.
         uint16 depositFeeBP;      // Deposit fee in basis points
     }
 
-    // The BOOTY TOKEN!
-    PirateBooty public booty;
+    // The ROID TOKEN!
+    Astroid public roid;
     // Dev address.
     address public devaddr;
     // burnAddress
     address public burnAddress;
-    // BOOTY tokens created per block.
-    uint256 public bootyPerBlock;
-    // Bonus muliplier for early booty makers.
+    // ROID tokens created per block.
+    uint256 public roidPerBlock;
+    // Bonus muliplier for early roid makers.
     uint256 public constant BONUS_MULTIPLIER = 1;
     // Deposit Fee address
     address public feeAddress;
@@ -855,7 +855,7 @@ contract MasterChef is Ownable {
     mapping (uint256 => mapping (address => UserInfo)) public userInfo;
     // Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
-    // The block number when BOOTY mining starts.
+    // The block number when ROID mining starts.
     uint256 public startBlock;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
@@ -863,18 +863,18 @@ contract MasterChef is Ownable {
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
     constructor(
-        PirateBooty _booty,
+        Astroid _roid,
         address _devaddr,
         address _feeAddress,
         address _burnAddress,
-        uint256 _bootyPerBlock,
+        uint256 _roidPerBlock,
         uint256 _startBlock
     ) public {
-        booty = _booty;
+        roid = _roid;
         devaddr = _devaddr;
         feeAddress = _feeAddress;
         burnAddress = _burnAddress;
-        bootyPerBlock = _bootyPerBlock;
+        roidPerBlock = _roidPerBlock;
         startBlock = _startBlock;
     }
 
@@ -895,12 +895,12 @@ contract MasterChef is Ownable {
             lpToken: _lpToken,
             allocPoint: _allocPoint,
             lastRewardBlock: lastRewardBlock,
-            accBootyPerShare: 0,
+            accRoidPerShare: 0,
             depositFeeBP: _depositFeeBP
         }));
     }
 
-    // Update the given pool's BOOTY allocation point and deposit fee. Can only be called by the owner.
+    // Update the given pool's ROID allocation point and deposit fee. Can only be called by the owner.
     function set(uint256 _pid, uint256 _allocPoint, uint16 _depositFeeBP, bool _withUpdate) public onlyOwner {
         require(_depositFeeBP <= 10000, "set: invalid deposit fee basis points");
         if (_withUpdate) {
@@ -916,18 +916,18 @@ contract MasterChef is Ownable {
         return _to.sub(_from).mul(BONUS_MULTIPLIER);
     }
 
-    // View function to see pending BOOTYs on frontend.
-    function pendingBooty(uint256 _pid, address _user) external view returns (uint256) {
+    // View function to see pending ROIDs on frontend.
+    function pendingRoid(uint256 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
-        uint256 accBootyPerShare = pool.accBootyPerShare;
+        uint256 accRoidPerShare = pool.accRoidPerShare;
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
             uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-            uint256 bootyReward = multiplier.mul(bootyPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-            accBootyPerShare = accBootyPerShare.add(bootyReward.mul(1e12).div(lpSupply));
+            uint256 roidReward = multiplier.mul(roidPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+            accRoidPerShare = accRoidPerShare.add(roidReward.mul(1e12).div(lpSupply));
         }
-        return user.amount.mul(accBootyPerShare).div(1e12).sub(user.rewardDebt);
+        return user.amount.mul(accRoidPerShare).div(1e12).sub(user.rewardDebt);
     }
 
     // Update reward variables for all pools. Be careful of gas spending!
@@ -950,22 +950,22 @@ contract MasterChef is Ownable {
             return;
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 bootyReward = multiplier.mul(bootyPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-        booty.mint(devaddr, bootyReward.div(10));
-        booty.mint(address(this), bootyReward);
-        pool.accBootyPerShare = pool.accBootyPerShare.add(bootyReward.mul(1e12).div(lpSupply));
+        uint256 roidReward = multiplier.mul(roidPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+        roid.mint(devaddr, roidReward.div(10));
+        roid.mint(address(this), roidReward);
+        pool.accRoidPerShare = pool.accRoidPerShare.add(roidReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
     }
 
-    // Deposit LP tokens to MasterChef for BOOTY allocation.
+    // Deposit LP tokens to MasterChef for ROID allocation.
     function deposit(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
         if (user.amount > 0) {
-            uint256 pending = user.amount.mul(pool.accBootyPerShare).div(1e12).sub(user.rewardDebt);
+            uint256 pending = user.amount.mul(pool.accRoidPerShare).div(1e12).sub(user.rewardDebt);
             if(pending > 0) {
-                safeBootyTransfer(msg.sender, pending);
+                safeRoidTransfer(msg.sender, pending);
             }
         }
         if(_amount > 0) {
@@ -981,7 +981,7 @@ contract MasterChef is Ownable {
                 user.amount = user.amount.add(_amount);
             }
         }
-        user.rewardDebt = user.amount.mul(pool.accBootyPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accRoidPerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
     }
 
@@ -991,15 +991,15 @@ contract MasterChef is Ownable {
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
-        uint256 pending = user.amount.mul(pool.accBootyPerShare).div(1e12).sub(user.rewardDebt);
+        uint256 pending = user.amount.mul(pool.accRoidPerShare).div(1e12).sub(user.rewardDebt);
         if(pending > 0) {
-            safeBootyTransfer(msg.sender, pending);
+            safeRoidTransfer(msg.sender, pending);
         }
         if(_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accBootyPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accRoidPerShare).div(1e12);
         emit Withdraw(msg.sender, _pid, _amount);
     }
 
@@ -1014,13 +1014,13 @@ contract MasterChef is Ownable {
         emit EmergencyWithdraw(msg.sender, _pid, amount);
     }
 
-    // Safe booty transfer function, just in case if rounding error causes pool to not have enough BOOTYs.
-    function safeBootyTransfer(address _to, uint256 _amount) internal {
-        uint256 bootyBal = booty.balanceOf(address(this));
-        if (_amount > bootyBal) {
-            booty.transfer(_to, bootyBal);
+    // Safe roid transfer function, just in case if rounding error causes pool to not have enough ROIDs.
+    function safeRoidTransfer(address _to, uint256 _amount) internal {
+        uint256 roidBal = roid.balanceOf(address(this));
+        if (_amount > roidBal) {
+            roid.transfer(_to, roidBal);
         } else {
-            booty.transfer(_to, _amount);
+            roid.transfer(_to, _amount);
         }
     }
 
@@ -1040,8 +1040,8 @@ contract MasterChef is Ownable {
         feeAddress = _feeAddress;
     }
 
-    function updateEmissionRate(uint256 _bootyPerBlock) public onlyOwner {
+    function updateEmissionRate(uint256 _roidPerBlock) public onlyOwner {
         massUpdatePools();
-        bootyPerBlock = _bootyPerBlock;
+        roidPerBlock = _roidPerBlock;
     }
 }
